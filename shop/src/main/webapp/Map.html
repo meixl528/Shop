@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+body, html {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	font-family: "微软雅黑";
+}
+
+#allmap {
+	width: 100%;
+	height: 500px;
+}
+
+p {
+	margin-left: 5px;
+	font-size: 14px;
+}
+</style>
+<script type="text/javascript"
+	src="http://api.map.baidu.com/api?v=2.0&ak=4ochbbkn5aKzvBlfIWKC0th80GYKDcR6"></script>
+<title>圆形区域搜索</title>
+</head>
+<body onload="onload()">
+	<div id="allmap"></div>
+	<p>
+		返回北京市地图上圆形覆盖范围内的“餐馆”检索结果，并展示在地图上
+		<button type="button" onclick="setPoint(1500)">设置范围</button>
+		<button type="button" onclick="setCenterPoint()">设置中心点</button>
+	</p>
+</body>
+</html>
+<script type="text/javascript">
+	// 百度地图API功能
+	var circle;
+	var map;
+	var mPoint;
+	function onload(){
+		
+		map = new BMap.Map("allmap"); // 创建Map实例
+		mPoint = new BMap.Point(116.404, 39.915);
+		map.enableScrollWheelZoom();
+		map.centerAndZoom(mPoint, 15);
+		
+		circle = new BMap.Circle(mPoint, 1000, {
+			fillColor : "blue",
+			strokeWeight : 1,
+			fillOpacity : 0.3,
+			strokeOpacity : 0.3
+		});
+		map.addOverlay(circle);
+		
+		init_point();
+	}
+	
+
+	
+	
+	/* var local = new BMap.LocalSearch(map, {
+		renderOptions : {
+			map : map,
+			autoViewport : false
+		}
+	}); */
+
+	//var mPointA = new BMap.Point(114.404, 38.915);
+	//local.searchNearby('公安部',mPoint,200000);
+
+	var data_info = [ [ 116.417854, 39.921988, "阳光包装<br>地址：北京市东城区王府井大街88号乐天银泰百货八层" ],
+			[ 117.406605, 39.921585, "纸厂<br>地址：北京市东城区东华门大街" ],
+			[ 117.412222, 39.912345, "蒙牛<br>地址：北京市东城区正义路甲5号" ] ];
+	var opts = {
+		width : 250, // 信息窗口宽度
+		height : 80, // 信息窗口高度
+		title : "",  // 信息窗口标题
+		enableMessage : true
+	//设置允许信息窗发送短息
+	};
+	
+	//加载point点 
+	function init_point(){
+		for (var i = 0; i < data_info.length; i++) {
+			var marker = new BMap.Marker(new BMap.Point(data_info[i][0],
+					data_info[i][1])); // 创建标注
+			var content = data_info[i][2];
+			map.addOverlay(marker); // 将标注添加到地图中
+			addClickHandler(content, marker);
+		}
+	}
+	
+	function addClickHandler(content, marker) {
+		marker.addEventListener("click", function(e) {
+			openInfo(content, e)
+		});
+	}
+	function openInfo(content, e) {
+		var p = e.target;
+		var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+		var infoWindow = new BMap.InfoWindow(content, opts); // 创建信息窗口对象 
+		map.openInfoWindow(infoWindow, point); //开启信息窗口
+	}
+	
+	// 设置圆半径范围 
+	function setPoint(cir){
+		if(circle!=null) map.removeOverlay(circle);
+		circle = new BMap.Circle(mPoint, cir, {
+			fillColor : "blue",
+			strokeWeight : 1,
+			fillOpacity : 0.3,
+			strokeOpacity : 0.3
+		});
+		map.addOverlay(circle);
+	}
+	
+	function setCenterPoint(){
+		mPoint = new BMap.Point(117.404, 39.915);
+		//map.panTo(new BMap.Point(118.404, 39.915));
+		map.centerAndZoom(mPoint,15);
+		init_point();
+		setPoint(2500);
+	}
+</script>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+body, html {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	font-family: "微软雅黑";
+}
+
+#allmap {
+	width: 100%;
+	height: 500px;
+}
+
+p {
+	margin-left: 5px;
+	font-size: 14px;
+}
+
+table.gridtable {
+	font-family: verdana,arial,sans-serif;
+	font-size:11px;
+	color:#333333;
+	border-width: 1px;
+	border-color: #666666;
+	border-collapse: collapse;
+}
+table.gridtable th {
+	border-width: 1px;
+	padding: 8px;
+	border-style: solid;
+	border-color: #666666;
+	background-color: #dedede;
+}
+table.gridtable td {
+	border-width: 1px;
+	padding: 8px;
+	border-style: solid;
+	border-color: #666666;
+	background-color: #ffffff;
+}
+</style>
+
+<script type="text/javascript"
+	src="http://api.map.baidu.com/api?v=2.0&ak=ZPPOUiyTk6X0OywDFmEVGQxRFlYnmZRZ"></script>
+<!-- <script type="text/javascript"
+	src="http://api.map.baidu.com/api?v=2.0&ak=42b8ececa9cd6fe72ae4cddd77c0da5d"></script> -->
+<!-- <script type="text/javascript"
+	src="http://api.map.baidu.com/api?v=2.0&ak=4ochbbkn5aKzvBlfIWKC0th80GYKDcR6"></script> -->
+<script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="js/ajaxfileupload.js"></script>
+<title>圆形区域搜索</title>
+</head>
+<body onload="onload()">
+	<div id="allmap"></div>
+	<p>
+		返回数据库地点检索结果，并展示在地图上&nbsp; excel导入: <input type="file" name="file"
+			id="file">
+		<button id="import" type="button">导入</button>
+		<hr>
+		&nbsp;地址:<input type="text" id="address" value="新乡市牧野工业电源产业园区18号"/>城市:<input type="text" id="city" />半径:<input type="text" id="circle" value="220000"/>
+		<button type="button" id="search">搜索</button>
+	</p>
+	
+</body>
+</html>
+<script type="text/javascript">
+	// 百度地图API功能
+	var circle;
+	var map;
+	var mPoint;
+	function onload() {
+
+		map = new BMap.Map("allmap"); // 创建Map实例
+		mPoint = new BMap.Point(116.404, 39.915);
+		map.enableScrollWheelZoom();
+		map.centerAndZoom(mPoint, 9);
+
+		circle = new BMap.Circle(mPoint, 100000,{
+			fillColor : "blue",
+			strokeWeight : 1,
+			fillOpacity : 0.3,
+			strokeOpacity : 0.3
+		});
+		map.addOverlay(circle);
+
+		// init_point();
+	}
+
+	/* var local = new BMap.LocalSearch(map, {
+		renderOptions : {
+			map : map,
+			autoViewport : false
+		}
+	}); */
+
+	//var mPointA = new BMap.Point(114.404, 38.915);
+	//local.searchNearby('公安部',mPoint,200000);
+	var data_info = [
+			[ 116.417854, 39.921988, "阳光包装<br>地址：北京市东城区王府井大街88号乐天银泰百货八层"],
+			[ 117.406605, 39.921585, "纸厂<br>地址：北京市东城区东华门大街" ],
+			[ 117.412222, 39.912345, "蒙牛<br>地址：北京市东城区正义路甲5号" ] ];
+	var opts = {
+		width : 300, // 信息窗口宽度
+		height : 60, // 信息窗口高度
+		title : "", // 信息窗口标题
+		enableMessage : true
+	//设置允许信息窗发送短息
+	};
+
+	//加载point点 
+	var primaryData = null;
+	function init_point(data) {
+		for (var j = 0; j < data.length; j++) {
+			var marker = new BMap.Marker(new BMap.Point(data[j][0],
+					data[j][1])); // 创建标注
+			var content = data[j][2];
+			map.addOverlay(marker); // 将标注添加到地图中
+			addClickHandler(content, marker);
+		}
+	}
+
+	function addClickHandler(content, marker) {
+		marker.addEventListener("click", function(e) {
+			openInfo(content, e)
+		});
+	}
+	function openInfo(content, e) {
+		var p = e.target;
+		var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+		var infoWindow = new BMap.InfoWindow(content, opts); // 创建信息窗口对象 
+		map.openInfoWindow(infoWindow, point); //开启信息窗口
+	}
+
+	// 设置圆半径范围 
+	function setPoint(cir) {
+		if (circle != null)
+			map.removeOverlay(circle);
+		circle = new BMap.Circle(mPoint, cir, {
+			fillColor : "blue",
+			strokeWeight : 1,
+			fillOpacity : 0.3,
+			strokeOpacity : 0.3
+		});
+		map.addOverlay(circle);
+	}
+
+	function setCenterPoint() {
+		if($("#circle").val()==""){
+			alert("设置半径");
+			return;
+		}
+		mPoint = new BMap.Point(113.8967220000,35.3388900000);
+		//map.panTo(new BMap.Point(118.404, 39.915));
+		map.centerAndZoom(mPoint, 9);
+		setPoint($("#circle").val());
+	}
+
+	$("#import").click(
+			function() {
+				var filePath = document.getElementById("file").value;
+				var ds = filePath.toString();
+				var extend = filePath.substring(filePath.lastIndexOf("."),
+						filePath.length);
+				if (extend == ".xlsx" || extend == ".xls") {
+					$.ajaxFileUpload({
+						url : 'excelimport.do',
+						// url: '/upload.aspx', //用于文件上传的服务器端请求地址
+						secureuri : false, //是否需要安全协议，一般设置为false
+						fileElementId : 'file', //文件上传域的ID
+						//dataType: 'json', //返回值类型 一般设置为json
+						success : function(e) //服务器成功响应处理函数
+						{
+							alert(" success");
+						},
+						error : function(e)//服务器响应失败处理函数
+						{
+							alert("failed");
+						}
+					});
+				}
+			})
+
+	var table ="";
+	$("#search").click(function() {
+		if($("#address").val()==""){
+			alert("设置地址");
+			return;
+		}
+		if($("#circle").val()==""){
+			alert("设置半径");
+			return;
+		}
+		$.ajax({
+			url : "excelSearch.do",
+			data : {
+				address : $("#city").val() + $("#address").val(),
+				circle : $("#circle").val()
+			},
+			dataType : "json",
+			type : "post",
+			cache : false,
+			success : function(data) {
+				map.clearOverlays(); //清除
+				
+				var dataArr = [];
+				$("#table").remove();
+				table ="<tr><th>序号</th><th>行业</th><th>终端客户母公司</th><th>子公司及制造工厂</th><th>省、直辖市</th><th>市、区、县</th><th>所在地地址</th><th>主营业务或主要产品和品牌</th><th>总产能（吨/年）</th><th>销售收入（亿元/年）</th><th>纸制品包装投入（亿元/年）</th><th>距离</th><tr>";
+				for(var i=0;i<data.length;i++){
+					var daArr = [];
+					daArr.push(data[i].x);
+					daArr.push(data[i].y);
+					if(i==data.length-1){
+						//mPoint = new BMap.Point(113.8967220000,35.3388900000);
+						mPoint = new BMap.Point(data[i].x,data[i].y);
+						//map.panTo(new BMap.Point(118.404, 39.915));
+						map.centerAndZoom(mPoint, 9);
+						setPoint($("#circle").val());
+						daArr.push("中心:"+data[i].address);
+					}else{
+						daArr.push(data[i].zhongduankehu+"<br>城市:"+data[i].city+"&nbsp;&nbsp;距离:"+data[i].distance+"<br>地址:"+data[i].address);
+						table +="<tr><td>"+(i+1)+"</td><td>"+data[i].hangye+"</td><td>"+data[i].zhongduankehu+"</td><td>"+data[i].zigongsi+"</td><td>"+data[i].province+"</td><td>"+data[i].city+"</td><td>"+data[i].address+"</td><td>"+data[i].work+"</td><td>"+data[i].productivity+"</td><td>"+data[i].income+"</td><td>"+data[i].output+"</td><td>"+data[i].distance+"</td><tr>";
+					}
+					dataArr.push(daArr);
+				}
+				if(dataArr){
+					init_point(dataArr);
+					
+				}
+				table ='<table id="table" class="gridtable" border="0">'+ table +'</table>';
+				$("body").append(table);
+				//document.getElementById("table").innerHtml = tr;
+			},
+			error : function(er) {
+				alert("error")
+			}
+		})
+	});
+</script>

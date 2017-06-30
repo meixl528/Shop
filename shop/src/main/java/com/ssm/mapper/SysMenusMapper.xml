@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTDMapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssm.mapper.SysMenusMapper">
+	<!-- <cache type="com.ssm.util.LoggingRedisCache"></cache> -->
+	<!-- <select id="list" resultType="SysMenus">
+		select * from sys_Menus 
+	</select> -->
+	<select id="listById" resultType="com.ssm.dto.SysMenus" parameterType="Integer">
+		select * from sys_Menus where pId = #{id}
+	</select>
+	
+	<insert id="add" parameterType="com.ssm.dto.SysMenus">
+		insert into sys_Menus (name,url,pId) values (#{name},#{url},#{pId})
+	</insert>
+	
+	<delete id="delete" parameterType="int">
+		delete from sys_Menus where id = #{id}
+	</delete>
+</mapper>

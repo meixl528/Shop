@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTDMapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.ssm.mapper.ExcelMapper">
+	<!-- <cache type="com.ssm.util.LoggingRedisCache"></cache> -->
+	<select id="getExcelList" resultType="com.ssm.dto.Excel">
+		select * from excel
+	</select>
+	
+	<insert id="add" parameterType="com.ssm.dto.Excel">
+		insert into excel (hangye,zhongduankehu,zigongsi,province,city,address,work,productivity,income,output,x,y,description) 
+		values (#{hangye},#{zhongduankehu},#{zigongsi},#{province},#{city},#{address},#{work},#{productivity},#{income},#{output},#{x},#{y},#{description})
+	</insert>
+	
+	<select id="isExist" resultType="Object">
+		select id from excel 
+		where hangye=#{hangye} 
+		and zhongduankehu=#{zhongduankehu}
+		and zigongsi=#{zigongsi}
+		and province=#{province}
+		and city=#{city}
+		and address=#{address}
+		and work=#{work}
+		and productivity=#{productivity}
+		and income=#{income}
+		and output=#{output}
+		and description=#{description}
+	</select>
+	
+	<update id="update" parameterType="com.ssm.dto.Excel">
+		update excel 
+		set hangye=#{hangye}, 
+		zhongduankehu=#{zhongduankehu},
+		zigongsi=#{zigongsi},
+		province=#{province},
+		city=#{city},
+		address=#{address},
+		work=#{work},
+		productivity=#{productivity},
+		income=#{income},
+		output=#{output},
+		x=#{x},
+		y=#{y},
+		description=#{description}
+		where id = #{id}
+	</update>
+</mapper>

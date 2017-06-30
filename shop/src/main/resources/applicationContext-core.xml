@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	   http://www.springframework.org/schema/beans/spring-beans-4.0.xsd   
+	   http://www.springframework.org/schema/task  
+	   http://www.springframework.org/schema/task/spring-task-3.1.xsd
+       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop/spring-aop-4.0.xsd   
+       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd   
+       http://www.springframework.org/schema/context 
+       http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <!-- task任务扫描注解 -->
+	<task:annotation-driven />
+	
+	<!-- 读取数据库连接属性文件 -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:db.properties" />
+	</bean>
+
+	<!-- 配置datasource -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="${driver}" />
+		<property name="url" value="${url}" />
+		<property name="username" value="${username}" />
+		<property name="password" value="${password}" />
+	</bean>
+	<!-- 配置工厂 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- <property name="configLocation" value="classpath:mybatis.cfg.xml"></property>  -->
+		
+		<!-- 以下配置可以省略mybatis配置文件了  -->
+		<property name="mapperLocations" value="classpath*:/**/*Mapper.xml"/>
+		<property name="plugins">
+			<array>
+				<bean class="com.github.pagehelper.PageHelper"/>
+			</array>
+		</property>
+	</bean>
+
+	<!-- 配置声明式事务 -->
+	<!-- 事务管理器 -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"> 
+		<property name="dataSource" ref="dataSource" />
+	</bean> 
+
+ 	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="del*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="find*" propagation="REQUIRED" />
+			<tx:method name="get*" propagation="REQUIRED" />
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+	<!-- <aop:aspectj-autoproxy proxy-target-class="true" expose-proxy="true"/>  -->
+	<aop:config expose-proxy="true">
+		<aop:pointcut expression="execution(* *..*ServiceImpl.*(..))" id="pointcut" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut" />
+	</aop:config> 
+	
+	<!-- 由于spring AOP动态代理默认是通过接口，所以注入事务层的地方都要通过接口进行注入，如果通过实现类进行注入 -->
+	<tx:annotation-driven transaction-manager="txManager" proxy-target-class="true"/> 
+	
+	<!-- <aop:config>
+		<aop:pointcut expression="execution(* *..*ServiceImpl.*(..))" id="pointcut" />
+		<aop:advisor advice-ref="methodCacheInterceptor" pointcut-ref="pointcut" />
+	</aop:config> -->
+
+	<!-- 需要加入缓存的类或方法 -->
+	<!-- <bean id="methodCachePointCut" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor"> 
+		<property name="advice"> 
+			<ref bean="methodCacheInterceptor" /> 
+		</property> 
+		<property name="patterns"> 
+			<list> 
+				确定正则表达式列表 
+				<value>com\.ssm\.service\.impl\...*ServiceImpl.*</value> 
+			</list> 
+		</property>
+	 </bean> -->
+
+
+	<!-- 扫描注解 -->
+	<context:component-scan base-package="com.ssm" /> 
+
+	<!-- jedis 配置 -->
+	<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxIdle" value="${redis.maxIdle}" />
+		<property name="maxWaitMillis" value="${redis.maxWait}" />
+		<property name="testOnBorrow" value="${redis.testOnBorrow}" />
+	</bean>
+
+	<!-- redis工厂 -->
+	<bean id="jedisConnectionFactory"
+		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+		p:host-name="localhost" p:port="6379" p:password="" p:database="2" />
+
+	<!-- cache配置 -->
+	<bean id="methodCacheInterceptor" class="com.ssm.redis.MethodCacheInterceptor">
+		<!-- <property name="redisUtil" ref="redisUtil" /> -->
+	</bean>
+	<!-- <bean id="redisUtil" class="com.ssm.redis.RedisUtil"> </bean> -->
+	
+	<bean id="cookieHttpSessionStrategy"
+		class="org.springframework.session.web.http.CookieHttpSessionStrategy">
+		<property name="cookieName" value="SESSIONID_HAP" />
+	</bean>
+
+	<!-- 这里的是为了下面的 Session策略过滤器提供构造函数传入的参数，因为Session过滤器要依赖该对象来构造，所以创建一个先 -->
+	<bean name="redisOperationsSessionRepository"
+		class="org.springframework.session.data.redis.RedisOperationsSessionRepository">
+		<constructor-arg ref="jedisConnectionFactory" />
+		<property name="defaultMaxInactiveInterval" value="86400" />
+	</bean>
+
+	<!-- 这个是Session策略过滤器，即将容器原有的Session持久化机制，代替为Spring的 Redis持久化Session机制。 -->
+	<!-- 注意，这个名字与 web.xml里的targetBean的下value是要一致的。 -->
+	<bean name="springSession" class="org.springframework.session.web.http.SessionRepositoryFilter">
+		<constructor-arg ref="redisOperationsSessionRepository" />
+		<property name="httpSessionStrategy" ref="cookieHttpSessionStrategy" />
+	</bean>
+
+	<bean id="redisService" class="com.ssm.redis.RedisServiceUtil">
+	</bean>
+
+	<bean id="stringRedisSerializer"
+          class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+          
+	<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate"> 
+		<property name="connectionFactory" ref="jedisConnectionFactory" />
+        <property name="keySerializer" ref="stringRedisSerializer"/>  
+	    <property name="valueSerializer" ref="stringRedisSerializer"/>  
+	    <property name="hashKeySerializer" ref="stringRedisSerializer"/>  
+	    <property name="hashValueSerializer" ref="stringRedisSerializer"/>  
+	</bean> 
+
+	<bean id="testCache" class="com.ssm.service.impl.TestCacheImpl">
+		<property name="name" value="userCache" />
+        <property name="type" value="com.ssm.dto.User"/>
+        <property name="keyField" value="id"/>
+        <property name="loadOnStartUp" value="true"/>
+        <property name="sqlId" value="com.ssm.mapper.UserMapper.getUserListLimit"/>
+	</bean>
+	<bean id="initService" class="com.ssm.service.impl.InitServiceImpl">
+		<property name="init" value="true" />
+		<property name="caches">
+			<list>
+				<!-- <ref bean="testCache"/> -->
+			</list>
+		</property>
+	</bean>
+
+	<!-- 扫描 mapper -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.ssm.mapper"></property>
+	</bean>
+
+
+	<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper">
+    </bean>
+   
+</beans>

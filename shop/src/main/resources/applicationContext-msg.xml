@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~ #{copyright}# -->
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<!-- 发布消息工具类 -->
+    <bean id="messagePublisher" class="com.ssm.message.impl.MessagePublisherImpl"/>
+
+    <bean id="messageListeners" class="com.ssm.message.TopicMessageListenerRegister">
+        <property name="listeners">
+            <list>
+            	<!-- <ref bean="testTopicMonitor"/> -->
+                <!-- auto detect bean with annotation TopicMonitor -->
+            </list>
+        </property>
+    </bean>
+
+    <!--发布/订阅监听-->
+    <bean class="org.springframework.data.redis.listener.RedisMessageListenerContainer">
+        <property name="connectionFactory" ref="jedisConnectionFactory"/>
+        <property name="recoveryInterval" value="10000"/>
+        <property name="messageListeners" ref="messageListeners"/>
+    </bean>
+
+	<!--队列监听-->
+    <bean class="com.ssm.message.QueueListenerContainer">
+        <property name="connectionFactory" ref="jedisConnectionFactory"/>
+        <property name="recoveryInterval" value="5000"/>
+        <property name="stringRedisSerializer" ref="stringRedisSerializer"/>
+        <property name="listeners">
+            <list>
+                <!-- auto detect bean with annotation QueueMonitor -->
+            </list>
+        </property>
+    </bean>
+  
+  	<!-- 测试 消息-->
+   	<bean id="testMonitorService" class="com.ssm.message.impl.TestMonitorServiceImpl">
+        <!-- <property name="queue" value="queue:cache:reload"/> -->
+        <!-- <property name="publishMessageTo" value="topic:cache:reloade,topic:cache:reloadd"/> -->
+        <!-- <property name="publishMessageTo" value="topic:cache:reloade,topic:cache:reloadd"/>  -->
+    </bean> 
+    <!-- 测试 消息-->
+    <bean id="testTopicMonitor" class="com.ssm.message.impl.TestTopicMonitor">
+    	 <!-- <property name="publishMessageTo" value="1"/> -->
+    </bean> 
+    
+    <bean id="testQueue" class="com.ssm.activeMQ.test.TestQueue" />
+    <bean id="testQueue2" class="com.ssm.activeMQ.test.TestQueue2" />
+    
+    <bean id="testTopic" class="com.ssm.activeMQ.test.TestTopic" />
+</beans>
