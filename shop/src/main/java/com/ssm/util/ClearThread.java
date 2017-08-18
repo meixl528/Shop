@@ -6,8 +6,8 @@ import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.ssm.common.service.UserService;
 import com.ssm.redis.MethodCacheInterceptor;
-import com.ssm.service.UserService;
 
 public class ClearThread extends Thread{
 	

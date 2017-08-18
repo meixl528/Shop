@@ -2,6 +2,7 @@ package Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.ssm.dto.User;
+import com.ssm.common.dto.User;
 
 import net.sf.json.JSONArray;
 
@@ -46,7 +47,8 @@ public class ObjectMapper {
 	     */
 		lu.stream().sorted(Comparator.comparing(User::getTelephone)).filter((s) -> s.getTelephone().startsWith("a")).forEach(System.out::println);
 		System.out.println("lu = "+lu); 
-		
+		Collections.sort(lu, (User a,User b) -> a.getTelephone().compareTo(b.getTelephone())); 
+		System.out.println(lu);
 		
 		List<Integer> sList = new ArrayList<>();
 		sList.add(8);sList.add(9);
@@ -61,6 +63,9 @@ public class ObjectMapper {
 		String o = objectMapper.writeValueAsString(map);
 		System.out.println(o); 
 		
+		Object aa =1;
+		Object bb = new Integer(1);
+		System.out.println("aa == bb : "+ aa.equals(bb));
 		
 	}
 

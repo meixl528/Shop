@@ -16,12 +16,11 @@ import java.util.Properties;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.mysql.fabric.xmlrpc.base.Array;
-import com.ssm.dto.SysMenus;
+import com.ssm.common.dto.SysMenus;
 import com.ssm.util.SerializeUtil;
 
 public class MethodCacheInterceptor implements MethodInterceptor {

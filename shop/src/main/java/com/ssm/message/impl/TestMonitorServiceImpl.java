@@ -12,13 +12,13 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.ssm.common.service.Cache;
+import com.ssm.common.service.InitService;
 import com.ssm.message.IMessagePublisher;
 import com.ssm.message.IQueueMessageListener;
 import com.ssm.message.ITopicMessageListener;
 import com.ssm.message.QueueMonitor;
 import com.ssm.message.TopicMonitor;
-import com.ssm.service.Cache;
-import com.ssm.service.InitService;
 /**
  * 用来接收<b>队列</b>消息, reload一个Cache.
  * <p>

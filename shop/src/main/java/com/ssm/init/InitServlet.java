@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.ssm.service.UserService;
+import com.ssm.common.service.UserService;
 
 /**
  * 项目启动加载 servlet方式   ->  4种方式:http://blog.csdn.net/fcly2013/article/details/19984061

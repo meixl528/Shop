@@ -9,8 +9,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import com.ssm.dto.User;
-import com.ssm.service.UserService;
+import com.ssm.common.dto.User;
+import com.ssm.common.service.UserService;
 
 public class TestRedis {
 

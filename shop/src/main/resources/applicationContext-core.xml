@@ -16,6 +16,9 @@
        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd   
        http://www.springframework.org/schema/context 
        http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+       
+	<!-- 新增AOP自动代理  @Aspect风格的切面声明能支持 -->
+    <aop:aspectj-autoproxy />
 
     <!-- task任务扫描注解 -->
 	<task:annotation-driven />
@@ -33,7 +36,25 @@
 		<property name="url" value="${url}" />
 		<property name="username" value="${username}" />
 		<property name="password" value="${password}" />
-	</bean>
+	</bean> 
+	
+	<!-- jndi方式  dataSource-->
+	<!-- <bean id="dynamicDataSourceAspect" class="com.ssm.core.jndi.db.DynamicDataSourceAspect" />
+      //多数据源控制,实现读写分离 
+    <bean id="dataSource" class="com.ssm.core.jndi.db.DynamicDataSource" >
+      <property name="dbs" ref="registerDB"></property>
+       //设置默认的dataSource
+      <property name="defaultTargetDataSource" ref="readWriteDataSource"></property>
+    </bean>
+	<bean id="readWriteDataSource" class="com.ssm.core.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="${db.jndiName}"/>
+    </bean>
+    
+    <bean id="registerDB" class="com.ssm.core.jndi.db.RegisterDB">
+        <property name="writeDB" value="${db.jndiName}"/>
+        <property name="readDB" value="${db.jndiRead}"/>
+     </bean> -->
+	
 	<!-- 配置工厂 -->
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
@@ -47,6 +68,12 @@
 			</array>
 		</property>
 	</bean>
+	<!-- 使用tk.mybatis通用工具包    必须这样扫描 -->
+	<bean class="tk.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="*.**.mapper"></property>
+		<property name="markerInterface" value="tk.mybatis.mapper.common.Mapper"/>
+	</bean>
+	
 
 	<!-- 配置声明式事务 -->
 	<!-- 事务管理器 -->
@@ -94,7 +121,9 @@
 
 
 	<!-- 扫描注解 -->
-	<context:component-scan base-package="com.ssm" /> 
+	<!-- 扫描注解 -->
+	<context:component-scan base-package="**.*.service"/>
+	<context:component-scan base-package="**.*.components"/>
 
 	<!-- jedis 配置 -->
 	<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
@@ -147,14 +176,14 @@
 	    <property name="hashValueSerializer" ref="stringRedisSerializer"/>  
 	</bean> 
 
-	<bean id="testCache" class="com.ssm.service.impl.TestCacheImpl">
+	<bean id="testCache" class="com.ssm.common.service.impl.TestCacheServiceImpl">
 		<property name="name" value="userCache" />
-        <property name="type" value="com.ssm.dto.User"/>
+        <property name="type" value="com.ssm.common.dto.User"/>
         <property name="keyField" value="id"/>
         <property name="loadOnStartUp" value="true"/>
-        <property name="sqlId" value="com.ssm.mapper.UserMapper.getUserListLimit"/>
+        <property name="sqlId" value="com.ssm.common.mapper.UserMapper.getUserListLimit"/>
 	</bean>
-	<bean id="initService" class="com.ssm.service.impl.InitServiceImpl">
+	<bean id="initService" class="com.ssm.common.service.impl.InitServiceImpl">
 		<property name="init" value="true" />
 		<property name="caches">
 			<list>
@@ -163,13 +192,11 @@
 		</property>
 	</bean>
 
-	<!-- 扫描 mapper -->
-	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-		<property name="basePackage" value="com.ssm.mapper"></property>
-	</bean>
-
-
 	<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper">
     </bean>
+    
+    <!-- 与javax.validation.Validator冲突  -->
+    <bean id="validator"
+    class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
    
 </beans>

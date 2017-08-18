@@ -6,11 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.ssm.common.service.Cache;
+import com.ssm.common.service.InitService;
 import com.ssm.message.ITopicMessageListener;
 import com.ssm.message.QueueMonitor;
 import com.ssm.message.TopicMonitor;
-import com.ssm.service.Cache;
-import com.ssm.service.InitService;
 
 @TopicMonitor(channel ={"topic:cache:reloaded"})
 public class TestTopicMonitor implements ITopicMessageListener<String>{

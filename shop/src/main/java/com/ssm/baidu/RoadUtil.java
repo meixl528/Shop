@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ssm.dto.Excel;
-import com.ssm.service.ExcelImportService;
+import com.ssm.common.dto.Excel;
+import com.ssm.common.service.ExcelImportService;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;

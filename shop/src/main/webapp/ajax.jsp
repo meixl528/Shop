@@ -8,8 +8,13 @@
 <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
 </head>
 <body>
+	<a href="qqLogin@Login">
+		<img src="images/login-qq.png" width="60" height="60">
+    </a>
+	<br><br>
+
 	姓名:<input type="text" name="name">
-	<button id="button" type="button">ajax提交</button>
+	<button id="restApi" type="button">调用system的restapi测试</button>
 	
 	<br><br>
 	
@@ -18,16 +23,15 @@
 	<ul id="ul">
 		
 	</ul>
+	
+	<br><br>
+	<button id="buttonDB" type="button">db切换测试</button>
 </body>
 <script>
-	$("#button").click(function(){
+	$("#restApi").click(function(){
 		$.ajax({
-			url:"http://192.168.10.32:8081/system/restapi/test",
-			data:{
-				//name : $("input[name='name']").val()
-				name :"meixl",
-				pass :"meixl"
-			},
+			url:"http://localhost:8081/system/restapi/test?restApiName=meixl&restApiPass=meixl",
+			data:{restContent : "88888"},
 			dataType:"json",
 			type:"post",
 			cache:false,
@@ -53,6 +57,23 @@
 				for(var i=0;i<data.length;i++){
 					$("#ul").append("<li><span>"+(i+1)+"</span><span>"+data[i].name+"</span><span>"+data[i].pass+"</span></li>");
 				}
+			},
+			error:function(er){
+				alert("error")
+			}
+		})
+	})
+	
+	
+	$("#buttonDB").click(function(){
+		$.ajax({
+			url:"db.do",
+			data:{},
+			dataType:"json",
+			type:"post",
+			cache:false,
+			success:function(data){
+				alert(data);
 			},
 			error:function(er){
 				alert("error")

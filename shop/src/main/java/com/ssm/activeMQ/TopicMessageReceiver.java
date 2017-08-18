@@ -99,13 +99,6 @@ public class TopicMessageReceiver implements InitializingBean {
 				for (ITopicListener bean : beans) {
 	            	bean.onTopicMessage(message, channel);
 				}
-				/*if (message instanceof TextMessage) {
-					TextMessage textMessage = (TextMessage) message;
-		            String text = textMessage.getText();
-		            for (ITopicListener bean : beans) {
-		            	bean.onTopicMessage(text, channel);
-					}
-		        }*/
 			}
 		}
 	}

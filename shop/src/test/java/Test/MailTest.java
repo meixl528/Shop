@@ -21,8 +21,12 @@ public class MailTest {
 	}
 
 	public static void send() throws MessagingException {
-		String host = "smtp.qq.com";
+		String host = "smtp.qq.com";   // smtp.exmail.qq.com  /465
 		int port = 25;
+		
+		//host = "smtp.exmail.qq.com";
+		//port = 465;
+		
 		String username = "694318499@qq.com";
 		String password = "figagtmyfunabdec";
 
@@ -52,7 +56,7 @@ public class MailTest {
 		// _content = content.replace("${tousername}", tousername);
 		help.setText(content, true);
 		
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 1; i++) {
 			mailSender.send(message);
 		}
 	}
